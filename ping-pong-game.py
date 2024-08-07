@@ -1,204 +1,92 @@
-# import turtle
-#
-# # First, we will create screen
-# screen_1 = turtle.Screen()
-# screen_1.title("Ping-Pong Game")
-# screen_1.bgcolor("Yellow")
-# screen_1.setup(width = 1050, height = 650)
-#
-#
-# # Left paddle
-# left_paddle = turtle.Turtle()
-# left_paddle.speed(0)
-# left_paddle.shape("square")
-# left_paddle.color("Red")
-# left_paddle.shapesize(stretch_wid = 6, stretch_len = 2)
-# left_paddle.penup()
-# left_paddle.goto(-400, 0)
-#
-#
-# # Right paddle
-# right_paddle = turtle.Turtle()
-# right_paddle.speed(0)
-# right_paddle.shape("square")
-# right_paddle.color("Blue")
-# right_paddle.shapesize(stretch_wid = 6, stretch_len = 2)
-# right_paddle.penup()
-# right_paddle.goto(400, 0)
-#
-#
-# # Ball of circle shape
-# hit_ball = turtle.Turtle()
-# hit_ball.speed(0)
-# hit_ball.shape("circle")
-# hit_ball.color("Black")
-# hit_ball.penup()
-# hit_ball.goto(0, 0)
-# hit_ball.dx = 5
-# hit_ball.dy = -5
-#
-#
-# # Now, we will initialize the score
-# left_player = 0
-# right_player = 0
-#
-#
-# # Displaying of the score
-# sketch_1 = turtle.Turtle()
-# sketch_1.speed(0)
-# sketch_1.color("blue")
-# sketch_1.penup()
-# sketch_1.hideturtle()
-# sketch_1.goto(0, 260)
-# sketch_1.write("Left Player : 0    Right Player: 0",
-#              align = "center", font = ("Courier", 24, "normal"))
-#
-#
-# # Implementing the functions for moving paddle vertically
-# def paddle_L_up():
-#     y = left_paddle.ycor()
-#     y += 20
-#     left_paddle.sety(y)
-#
-#
-# def paddle_L_down():
-#     y = left_paddle.ycor()
-#     y -= 20
-#     left_paddle.sety(y)
-#
-#
-# def paddle_R_up():
-#     y = right_paddle.ycor()
-#     y += 20
-#     right_paddle.sety(y)
-#
-#
-# def paddle_R_down():
-#     y = right_paddle.ycor()
-#     y -= 20
-#     right_paddle.sety(y)
-#
-#
-# # Then, binding the keys for moving the paddles up and down.
-# screen_1.listen()
-# screen_1.onkeypress(paddle_L_up, "w")
-# screen_1.onkeypress(paddle_L_down, "s")
-# screen_1.onkeypress(paddle_R_up, "Up")
-# screen_1.onkeypress(paddle_R_down, "Down")
-#
-#
-# while True:
-#     screen_1.update()
-#
-#     hit_ball.setx(hit_ball.xcor() + hit_ball.dx)
-#     hit_ball.sety(hit_ball.ycor() + hit_ball.dy)
-#
-#     # Check all the borders
-#     if hit_ball.ycor() > 280:
-#         hit_ball.sety(280)
-#         hit_ball.dy *= -1
-#
-#     if hit_ball.ycor() < -280:
-#         hit_ball.sety(-280)
-#         hit_ball.dy *= -1
-#
-#     if hit_ball.xcor() > 500:
-#         hit_ball.goto(0, 0)
-#         hit_ball.dy *= -1
-#         left_player += 1
-#         sketch_1.clear()
-#         sketch_1.write("Left_player : {}    Right_player: {}".format(
-#                       left_player, right_player), align = "center",
-#                       font = ("Courier", 24, "normal"))
-#
-#     if hit_ball.xcor() < -500:
-#         hit_ball.goto(0, 0)
-#         hit_ball.dy *= -1
-#         right_player += 1
-#         sketch_1.clear()
-#         sketch_1.write("Left_player : {}    Right_player: {}".format(
-#                                  left_player, right_player), align = "center",
-#                                  font = ("Courier", 24, "normal"))
-#
-#     # Collision of ball and paddles
-#     if (hit_ball.xcor() > 360 and
-#                         hit_ball.xcor() < 370) and (hit_ball.ycor() < right_paddle.ycor() + 60 and
-#                         hit_ball.ycor() > right_paddle.ycor() - 60):
-#                         hit_ball.setx(360)
-#                         hit_ball.dx *= -1
-#
-#     if (hit_ball.xcor() < -360 and
-#                        hit_ball.xcor() > -370) and (hit_ball.ycor() < left_paddle.ycor() + 60 and
-#                        hit_ball.ycor() > left_paddle.ycor() - 60):
-#                        hit_ball.setx(-360)
-#                        hit_ball.dx *= -1
-#
+import pygame
+from pygame import gfxdraw
+import random
 
-from matplotlib import pyplot as plt
-from matplotlib.animation import FuncAnimation, writers
-import numpy as np
+pygame.init()
+screen_width, screen_height = 1000, 600
+screen = pygame.display.set_mode((1000, 600))
 
-fig = plt.figure(figsize=(7, 5))
-axes = fig.add_subplot(1, 1, 1)
-axes.set_ylim(0, 300)
-palette = ['blue', 'red', 'green', 'darkorange', 'margon', 'black']
+bg_color = pygame.Color("BLACK")
+prop_color = pygame.Color("WHITE")
+ball_radius = 15
+player_width, player_height = 10, 150
 
-y1, y2, y3, y4, y5, y6 = [], [], [], [], [], []
+ball = pygame.Rect(screen_width // 2 - ball_radius, screen_height // 2 - ball_radius, ball_radius * 2, ball_radius * 2)
+player1 = pygame.Rect(0, screen_height // 2 - player_height // 2, player_width, player_height)
+player2 = pygame.Rect(screen_width - player_width, screen_height // 2 - player_height // 2, player_width, player_height)
 
+########################################################################################################################
 
-def animation_function(i):
-    y1 = i
-    y2 = 5 * i
-    y3 = 3 * i
-    y4 = 2 * i
-    y5 = 6 * i
-    y6 = 3 * i
+ball_speed_x, ball_speed_y = 5, 5
+player_speed = 10
+player1_delta, player2_delta = 0, 0
+player1_score, player2_score = 0, 0
+clock = pygame.time.Clock()
+font = pygame.font.SysFont("CASTELLAR", 35)
 
-    plt.xlabel("Country")
-    plt.ylabel("GDP of country")
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            quit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_s:
+                player1_delta = player_speed
+            if event.key == pygame.K_w:
+                player1_delta = -player_speed
+            if event.key == pygame.K_DOWN:
+                player2_delta = player_speed
+            if event.key == pygame.K_UP:
+                player2_delta = -player_speed
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_s or event.key == pygame.K_w:
+                player1_delta = 0
+            if event.key == pygame.K_DOWN or event.key == pygame.K_UP:
+                player2_delta = 0
 
-    plt.bar(["India", "Chine", "Germany", "USA", "Canda", "UK"])
+    ########################################################################################################################
 
-    plt.title("Bar Chart Animation")
+    player1.y += player1_delta
+    player2.y += player2_delta
+    player1.top = max(0, player1.top)
+    player2.top = max(0, player2.top)
+    player1.bottom = min(screen_height, player1.bottom)
+    player2.bottom = min(screen_height, player2.bottom)
 
-    animation = FuncAnimation(fig, animation_function, interval=50)
+    ball.x += ball_speed_x
+    ball.y += ball_speed_y
 
+    ########################################################################################################################
 
-x = []
-y = []
+    if ball.top <= 0 or ball.bottom >= screen_height:
+        ball_speed_y *= -1
+    if ball.left <= 0 or ball.right >= screen_width:
+        if ball.left <= 0:
+            player2_score += 1
+        else:
+            player1_score += 1
+        ball.center = (screen_width // 2, screen_height // 2)
+        ball_speed_x *= random.choice([-1, 1])
+        ball_speed_y *= random.choice([-1, 1])
 
-figure, ax = plt.subplots()
+    if ball.colliderect(player1) or ball.colliderect(player2):
+        ball_speed_x *= -1
 
-# Setting limits for x and y axis
-ax.set_xlim(0, 100)
-ax.set_ylim(0, 100)
+    ########################################################################################################################
 
-# Since plotting a single graph
-line, = ax.plot(0, 0)
-
-
-def animation_function(i):
-    x.append(i * 15)
-    y.append(i * 15)
-
-    line.set_xdata(x)
-    line.set_ydata(y)
-    return line,
-
-
-animition = FuncAnimation(figure, func=animation_function, frames=np.arange(0, 10, 0.1), interval=10)
-
-for i in range(100):
-    x.append(i)
-    y.append(i)
-
-# Mention x and y limits
-plt.xlim(0, 100)
-plt.ylim(0, 100)
-
-# Ploting graph
-plt.plot(x, y, color='green')
-plt.pause(0.01)
-
-plt.show()
-
+    screen.fill(bg_color)
+    player1_text = font.render('First Player : {}'.format(player1_score), True, prop_color)
+    player1_text_rect = player1_text.get_rect()
+    player1_text_rect.center = (screen_width // 4, 20)
+    screen.blit(player1_text, player1_text_rect)
+    player2_text = font.render('Second Player : {}'.format(player2_score), True, prop_color)
+    player2_text_rect = player2_text.get_rect()
+    player2_text_rect.center = (screen_width - screen_width // 4, 20)
+    screen.blit(player2_text, player2_text_rect)
+    pygame.draw.aaline(screen, prop_color, (screen_width // 2, 0), (screen_width // 2, screen_height))
+    gfxdraw.aacircle(screen, screen_width // 2, screen_height // 2, 200, prop_color)
+    pygame.draw.rect(screen, prop_color, player1)
+    pygame.draw.rect(screen, prop_color, player2)
+    gfxdraw.filled_circle(screen, ball.centerx, ball.centery, ball_radius, prop_color)
+    pygame.display.update()
+    clock.tick(60)
